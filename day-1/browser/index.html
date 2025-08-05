@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AI Chatbot (Local Only)</title>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+  <h2>Ask About Remote Work</h2>
+  <textarea id="question" rows="4" cols="60" placeholder="Type your question here..."></textarea><br><br>
+  <button onclick="askAI()">Ask AI</button>
+  <p><strong>🤖 Response:</strong></p>
+  <div id="response" style="white-space: pre-wrap; background: #f0f0f0; padding: 10px;"></div>
+
+  <script>
+    const API_KEY = "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"; // ⚠️ Replace with your real key (for testing only!)
+    const MODEL = "anthropic/claude-3.7-sonnet";
+
+    const longText = `
+Remote work has transformed the global workforce in recent years, offering a wide range of benefits for both employees and employers. One of the most significant advantages is flexibility. Employees are no longer restricted by geographical boundaries and can tailor their work schedules to align with their peak productivity hours. This leads to better work-life balance, reduced commuting stress, and increased job satisfaction. With remote work, individuals can reclaim hours previously lost in traffic, which they can now spend with family or on personal interests.
+
+Companies also benefit financially by saving on operational costs such as rent, electricity, and office supplies. Many organizations have reported increased productivity due to fewer in-office distractions and better employee morale. Moreover, businesses can tap into a global talent pool, hiring skilled professionals from anywhere in the world. This diversity can lead to more creative solutions and innovative thinking.
+
+Environmentally, remote work helps reduce the carbon footprint. With fewer people commuting and less office space being used, there is a noticeable drop in greenhouse gas emissions. It supports sustainable development goals and encourages a greener way of working.
+
+However, remote work is not without challenges. Communication gaps can occur, especially across different time zones. Employees may feel isolated without the social interactions of an office environment. To counter this, companies must invest in strong digital infrastructure and foster a culture of communication and inclusion.
+
+In conclusion, while remote work comes with certain hurdles, its advantages far outweigh the drawbacks when managed correctly. It promotes flexibility, cost-efficiency, global talent access, and sustainability. As technology continues to evolve, the remote work model is expected to become a long-term norm rather than a temporary trend.
+`;
+
+    async function askAI() {
+      const question = document.getElementById('question').value;
+
+      const prompt = `
+You are an AI assistant. Only use the information below to answer the user's question.
+
+If the answer is not available in the text, say:
+"Sorry, I don’t have enough information to answer that. You can email or call us for more details."
+
+TEXT:
+"""
+${longText}
+"""
+
+Question: ${question}
+`;
+
+      try {
+        const response = await axios.post(
+          'https://openrouter.ai/api/v1/chat/completions',
+          {
+            model: MODEL,
+            messages: [{ role: "user", content: prompt }],
+            max_tokens: 700
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${API_KEY}`,
+              'Content-Type': 'application/json'
+            }
+          }
+        );
+
+        document.getElementById('response').innerText = response.data.choices[0].message.content;
+      } catch (error) {
+        document.getElementById('response').innerText = "❌ Error: " + (error.response?.data?.error?.message || error.message);
+      }
+    }
+  </script>
+</body>
+</html>
